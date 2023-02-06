@@ -87,13 +87,16 @@ else if (currentGame is not null)
 
     private async Task SignUp()
     {
-        currentGame.Players.Add(newPlayerName, newPassword);
-        loggedIn = true;
-        loggedInPlayer = newPlayerName;
-        // http://localhost:7293/api/AddPlayer?id=game_id&player=dan&password=pass
-        string queryURL = baseURL + $"AddPlayer?id={Id}&player={newPlayerName}&password={newPassword}";
-        HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
-        await client.PutAsync(client.BaseAddress, null);
+        if (!currentGame.Players.ContainsKey(newPlayerName)){
+            currentGame.Players.Add(newPlayerName, newPassword);
+            loggedIn = true;
+            loggedInPlayer = newPlayerName;
+            // http://localhost:7293/api/AddPlayer?id=game_id&player=dan&password=pass
+            string queryURL = baseURL + $"AddPlayer?id={Id}&player={newPlayerName}&password={newPassword}";
+            HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+            await client.PutAsync(client.BaseAddress, null);
+        }
+
     }
 
     private void SignIn()
