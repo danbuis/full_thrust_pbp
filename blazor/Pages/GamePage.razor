@@ -5,15 +5,26 @@
 {
     <h1>@currentGame.Name</h1>
 }
-@if (!loggedIn)
+else
+{
+    <h1>If this message remains after a few seconds, that means the selected game id does not exist, please check for typos</h1>
+}
+@if (currentGame is not null && !loggedIn)
 {   <MudPaper Class="pa-16 ma-2" Elevation="3">
-        <MudText>If this is a new game, please make a note of this URL, you will need it to get back to the game.  To invite other players to join you, please share the URL with them</MudText>
+        <MudText>If this is a new game, please make a note of this game id, you will need it to get back to the game.  To invite other players to join you, please share the id with them</MudText>
+        <h2>@Id</h2>
         <MudText>You have not signed in yet, please either sign in, or add a username/login pair to this game to join it. </MudText>
     </MudPaper>
     <MudPaper Class="pa-16 ma-2" Elevation="3">
         <MudText>Sign up as a new player</MudText>
         <MudForm @ref="addPlayerForm" @bind-IsValid="@addPlayerSuccess" @bind-Errors="@addPlayerErrors">
-            <MudTextField T="string" @bind-Value=@newPlayerName Label="New player name" Counter="15" MaxLength="15" Required="true" RequiredError="Player Name is required!" />
+            <MudTextField T="string" @bind-Value=@newPlayerName 
+                          Label="New player name" 
+                          Counter="15" 
+                          MaxLength="15" 
+                          Required="true" 
+                          RequiredError="Player Name is required!" 
+                          Validation="@(new Func<string, string>(RepeatPlayerCheck))" />
             <MudTextField T="string" @bind-Value=@newPassword Label="New password" Counter="10" MaxLength="10" Required="true" RequiredError="Password is required!" />
             <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>SignUp())">Sign up</MudButton>
         </MudForm>
@@ -38,7 +49,7 @@
         </MudPaper>
     }
 }
-else    
+else if (currentGame is not null)   
 {
     <MudPaper>
         <MudText>Welcome @loggedInPlayer</MudText>
@@ -103,6 +114,14 @@ else
         return null;
     }
 
+    private string RepeatPlayerCheck(string arg)
+    {
+        bool repeatPlayer = currentGame.Players.ContainsKey(arg);
+        if (repeatPlayer)
+            return "That player already exists";
+        return null;
+    }
+
     private async Task GetGame()
     {
         string queryURL = baseURL + $"GetGame?id={Id}";
@@ -118,7 +137,5 @@ else
             Game newCurrentGame = JsonSerializer.Deserialize<Game>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             currentGame = newCurrentGame;
         }
-        string test = "test";
-        test += "a";
     }
 }
