@@ -1,0 +1,124 @@
+﻿@page "/game/{Id}"
+@using FT_Blazor.Models
+@using System.Text.Json;
+@if (currentGame is not null)
+{
+    <h1>@currentGame.Name</h1>
+}
+@if (!loggedIn)
+{   <MudPaper Class="pa-16 ma-2" Elevation="3">
+        <MudText>If this is a new game, please make a note of this URL, you will need it to get back to the game.  To invite other players to join you, please share the URL with them</MudText>
+        <MudText>You have not signed in yet, please either sign in, or add a username/login pair to this game to join it. </MudText>
+    </MudPaper>
+    <MudPaper Class="pa-16 ma-2" Elevation="3">
+        <MudText>Sign up as a new player</MudText>
+        <MudForm @ref="addPlayerForm" @bind-IsValid="@addPlayerSuccess" @bind-Errors="@addPlayerErrors">
+            <MudTextField T="string" @bind-Value=@newPlayerName Label="New player name" Counter="15" MaxLength="15" Required="true" RequiredError="Player Name is required!" />
+            <MudTextField T="string" @bind-Value=@newPassword Label="New password" Counter="10" MaxLength="10" Required="true" RequiredError="Password is required!" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>SignUp())">Sign up</MudButton>
+        </MudForm>
+    </MudPaper>
+    @if (currentGame != null && currentGame.Players.Count != 0)
+    {
+        <MudPaper Class="pa-16 ma-2" Elevation="3">
+            <MudText>Sign in as an existing player</MudText>
+            <MudForm @ref="signInPlayerForm" @bind-IsValid="@signInPlayerSuccess" @bind-Errors="@signInPlayerErrors">
+                <MudSelect Label="Select a player" T="string" @bind-Value=@selectedPlayer>
+                    @foreach (KeyValuePair<string, string> entry in currentGame.Players)
+                    {
+                        <MudSelectItem Value="@(entry.Key)" />
+                    }
+                </MudSelect>
+                <MudTextField T="string" @bind-Value=@currentPassword Label="Password" 
+                              Required="true" 
+                              RequiredError="Password is required!"
+                              Validation="@(new Func<string, string>(PasswordMatch))" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>SignIn())">Sign in</MudButton>
+            </MudForm>
+        </MudPaper>
+    }
+}
+else    
+{
+    <MudPaper>
+        <MudText>Welcome @loggedInPlayer</MudText>
+        <MudText>Congratulations on signing into the game!  #smiley</MudText>
+    </MudPaper>
+}
+
+
+@code {
+    MudForm? addPlayerForm;
+    Boolean addPlayerSuccess = false;
+    string[] addPlayerErrors = { };
+
+    MudForm? signInPlayerForm;
+    Boolean signInPlayerSuccess = false;
+    string[] signInPlayerErrors = { };
+    string selectedPlayer;
+
+    string gameTitle = "title";
+    Boolean loggedIn = false;
+    string loggedInPlayer = "";
+    string? newPlayerName = null;
+    string? newPassword = null;
+    string? currentPassword = null;
+    Game? currentGame = null;
+    string baseURL = "https://ft-functions.azurewebsites.net/api/";
+
+    [Parameter]
+    public string Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetGame();
+    }
+
+    private async Task SignUp()
+    {
+        currentGame.Players.Add(newPlayerName, newPassword);
+        loggedIn = true;
+        loggedInPlayer = newPlayerName;
+        // http://localhost:7293/api/AddPlayer?id=game_id&player=dan&password=pass
+        string queryURL = baseURL + $"AddPlayer?id={Id}&player={newPlayerName}&password={newPassword}";
+        HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+        await client.PutAsync(client.BaseAddress, null);
+    }
+
+    private void SignIn()
+    {
+        if (signInPlayerSuccess)
+        {
+            loggedIn = true;
+            loggedInPlayer = selectedPlayer;
+        }
+    }
+
+    private string PasswordMatch(string arg)
+    {
+        string expectedPassword;
+        currentGame.Players.TryGetValue(selectedPlayer, out expectedPassword);
+        if (expectedPassword != arg)
+            return "Passwords don't match";
+        return null;
+    }
+
+    private async Task GetGame()
+    {
+        string queryURL = baseURL + $"GetGame?id={Id}";
+        HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+
+        HttpResponseMessage response = null;
+
+        response = await client.GetAsync(client.BaseAddress);
+
+        if (response.Content is object && response.Content.Headers.ContentType.MediaType == "application/json")
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            Game newCurrentGame = JsonSerializer.Deserialize<Game>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            currentGame = newCurrentGame;
+        }
+        string test = "test";
+        test += "a";
+    }
+}

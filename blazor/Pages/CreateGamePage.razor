@@ -1,0 +1,57 @@
+﻿@page "/CreateNewGame"
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.WebUtilities
+@using FT_Blazor.Models;
+@using System.Text.Json;
+
+@inject NavigationManager _nav
+
+
+<PageTitle>Create New Game</PageTitle>
+
+<MudGrid>
+    <MudItem xs="12" sm="7">
+        <MudPaper Class="pa-16 ma-2" Elevation="3">
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+                <MudTextField T="string" @bind-Value=@Name Counter="50" MaxLength="50" Label="New Game's name'" Required="true" RequiredError="Game Name is required!" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>CreateGame())">Create Game</MudButton>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+    <MudPaper Class="pa-16 ma-2" Elevation="3">
+        <MudText>Width will be 100 units</MudText>
+        <MudText>Height will be 120 units</MudText>
+    </MudPaper>
+</MudGrid>
+
+
+@code {
+    string Name = "";
+    string baseURL = "https://ft-functions.azurewebsites.net/api/";
+    string updateString = "";
+    string responseReceived = "";
+
+    MudForm? form;
+    Boolean success = false;
+    string[] errors = { };
+
+    private async Task CreateGame()
+    {
+        form.Validate();
+        if (success)
+        {
+            updateString = "creating yout game";
+            string queryURL = baseURL + $"CreateGame?name={Name}";
+            HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+            HttpResponseMessage response = await client.GetAsync(client.BaseAddress);
+            responseReceived = await response.Content.ReadAsStringAsync();
+            if (response.Content is object && response.Content.Headers.ContentType.MediaType == "application/json")
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Game _newGame = JsonSerializer.Deserialize<Game>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                _nav.NavigateTo($"/game/{_newGame.Id}");
+            }
+        }
+    }
+}

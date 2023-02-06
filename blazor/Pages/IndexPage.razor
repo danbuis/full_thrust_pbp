@@ -1,0 +1,36 @@
+﻿@page "/"
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager _nav
+
+<PageTitle>Index</PageTitle>
+<MudPaper Class="pa-16 ma-2" Elevation="3">
+    <MudText Class="mb-8">Welcome to the Full Thrust game runner!</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="@(()=>_nav.NavigateTo("/CreateNewGame"))">Create a new Game</MudButton>
+</MudPaper>
+<MudGrid>
+    <MudItem xs="12" sm="7">
+        <MudPaper Class="pa-16 ma-2" Elevation="3">
+            <MudText Class="mb-8">To join an existing game, use the link provided to you, or use this text box to find it by its unique id</MudText>
+            <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+                <MudTextField T="string" @bind-Value=@Id Label="Game Id" Required="true" RequiredError="Game Id is required!" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>LoadGame())">Go to Game</MudButton>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    string Id = "";
+    MudForm? form;
+    Boolean success = false;
+    string[] errors = { };
+    private void LoadGame()
+    {
+        form.Validate();
+        if (success)
+        {
+            _nav.NavigateTo($"/game/{Id}");
+        }
+    }
+}
