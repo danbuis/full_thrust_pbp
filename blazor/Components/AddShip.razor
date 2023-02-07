@@ -9,7 +9,6 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>CreateShip())">Add ship to fleet</MudButton>
     </MudForm>
 </MudPaper>
-<p>Query: @querystring</p>
 
 @code {
     [Parameter, EditorRequired]
@@ -26,7 +25,6 @@
     string[] errors = { };
     string baseURL = "https://ft-functions.azurewebsites.net/api/";
     string shipName = "";
-    string querystring = "";
 
     private async Task CreateShip()
     {
@@ -34,7 +32,6 @@
         if (success)
         {
             string queryURL = baseURL + $"AddShip?ship_name={shipName}&id={GameObject.Id}&player={Player}";
-            querystring = queryURL;
             HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
             HttpResponseMessage response = await client.GetAsync(client.BaseAddress);
 
