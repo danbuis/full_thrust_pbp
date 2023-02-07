@@ -1,6 +1,8 @@
 ﻿@page "/game/{Id}"
 @using FT_Blazor.Models
+@using FT_Blazor.Components
 @using System.Text.Json;
+
 @if (currentGame is not null)
 {
     <h1>@currentGame.Name</h1>
@@ -55,10 +57,23 @@ else if (currentGame is not null)
         <MudText>Welcome @loggedInPlayer</MudText>
         <MudText>Congratulations on signing into the game!  #smiley</MudText>
     </MudPaper>
+
+    <AddShip GameObject=@currentGame Player=@loggedInPlayer></AddShip>
+    <h2>Ships</h2>
+    @if (currentGame.Ships.ContainsKey(loggedInPlayer))
+    {
+        List<string> playerShips;
+        currentGame.Ships.TryGetValue(loggedInPlayer, out playerShips);
+        foreach(string shipId in playerShips)
+        {
+            <p>@shipId</p>
+        }
+    }
 }
 
 
 @code {
+    //25e180a4-5bfd-49d0-be22-23cef3857c0f
     MudForm? addPlayerForm;
     Boolean addPlayerSuccess = false;
     string[] addPlayerErrors = { };

@@ -19,11 +19,11 @@ using System;
 
 namespace FT_Functions.GameFunctions;
 
-public class AddShips
+public class AddShip
 {
-    private readonly ILogger<AddShips> _logger;
+    private readonly ILogger<AddShip> _logger;
 
-    public AddShips(ILogger<AddShips> log)
+    public AddShip(ILogger<AddShip> log)
     {
         _logger = log;
     }
@@ -33,7 +33,7 @@ public class AddShips
     [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
     [OpenApiParameter(name: "id", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **ID** parameter of the game")]
     [OpenApiParameter(name: "player", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Player** parameter")]
-    [OpenApiParameter(name: "ship_names", In = ParameterLocation.Query, Required = true, Type = typeof(string[]), Description = "The **Ship Names** parameter")]
+    [OpenApiParameter(name: "ship_name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Ship Name** parameter")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)]
@@ -60,8 +60,7 @@ public class AddShips
 
         string id = req.Query["id"];
         string player = req.Query["player"];
-        string newShips = req.Query["ship_names"];
-        string[] newShipsArray = newShips.Split(",");
+        string newShip = req.Query["ship_names"];
 
         if (gameDocument == null || string.IsNullOrEmpty(id))
         {
@@ -75,31 +74,26 @@ public class AddShips
             shipsDictionary.Add(player, new List<string>());
         }
 
-        foreach (var newShip in newShipsArray)
+        string new_id = Guid.NewGuid().ToString();
+        shipsDictionary[player].Add(new_id);
+        Ship shipToAdd = new()
         {
-            string new_id = Guid.NewGuid().ToString();
-            shipsDictionary[player].Add(new_id);
-            Ship shipToAdd = new()
-            {
-                Id = new_id,
-                Name = newShip,
-                Player = player,
-                CurrentSpeed = 0,
-                CurrentBearing = 0,
-                X = 0,
-                Y = 0,
-                DateCreated = DateTime.Now
-            };
-            await ShipsDocumentsOut.AddAsync(shipToAdd);
-        }
+            Id = new_id,
+            Name = newShip,
+            Player = player,
+            CurrentSpeed = 0,
+            CurrentBearing = 0,
+            X = 0,
+            Y = 0,
+            DateCreated = DateTime.Now
+        };
+        await ShipsDocumentsOut.AddAsync(shipToAdd);
 
         gameDocument.SetPropertyValue("ships", shipsDictionary);
 
         await gameContainer.ReplaceDocumentAsync(gameDocument.SelfLink, gameDocument);
-
-        string responseMessage = "Function triggered successfully. Add Ships function.";
         
-        return new OkObjectResult(responseMessage);
+        return new OkObjectResult(shipToAdd);
     }
 }
 
