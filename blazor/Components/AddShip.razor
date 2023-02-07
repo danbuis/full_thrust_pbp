@@ -15,8 +15,11 @@
     [Parameter, EditorRequired]
     public string Player { get; set; }
 
-    [Parameter]
+    [Parameter, EditorRequired]
     public Game? GameObject { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback RefreshParent { get; set; }
 
     MudForm? form;
     Boolean success = false;
@@ -54,6 +57,8 @@
                     shipList.Add(_newShip.Id);
                     GameObject.Ships[Player] = shipList;
                 }
+                shipName = "";
+                await RefreshParent.InvokeAsync();
             }
         }
     }

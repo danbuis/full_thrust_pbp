@@ -57,8 +57,8 @@ else if (currentGame is not null)
         <MudText>Welcome @loggedInPlayer</MudText>
         <MudText>Congratulations on signing into the game!  #smiley</MudText>
     </MudPaper>
+    <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState/>
 
-    <AddShip GameObject=@currentGame Player=@loggedInPlayer></AddShip>
     <h2>Ships</h2>
     @if (currentGame.Ships.ContainsKey(loggedInPlayer))
     {
@@ -121,6 +121,11 @@ else if (currentGame is not null)
             loggedIn = true;
             loggedInPlayer = selectedPlayer;
         }
+    }
+
+    public void RefreshState()
+    {
+        this.StateHasChanged();
     }
 
     private string PasswordMatch(string arg)
