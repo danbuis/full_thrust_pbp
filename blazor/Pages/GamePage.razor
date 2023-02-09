@@ -57,18 +57,11 @@ else if (currentGame is not null)
         <MudText>Welcome @loggedInPlayer</MudText>
         <MudText>Congratulations on signing into the game!  #smiley</MudText>
     </MudPaper>
+
     <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState/>
 
-    <h2>Ships</h2>
-    @if (currentGame.Ships.ContainsKey(loggedInPlayer))
-    {
-        List<string> playerShips;
-        currentGame.Ships.TryGetValue(loggedInPlayer, out playerShips);
-        foreach(string shipId in playerShips)
-        {
-            <p>@shipId</p>
-        }
-    }
+    <ShipList Player=@loggedInPlayer GameObject=@currentGame RefreshParent=@RefreshState />
+
 }
 
 

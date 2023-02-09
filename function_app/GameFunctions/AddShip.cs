@@ -60,7 +60,7 @@ public class AddShip
 
         string id = req.Query["id"];
         string player = req.Query["player"];
-        string newShip = req.Query["ship_names"];
+        string newShip = req.Query["ship_name"];
 
         if (gameDocument == null || string.IsNullOrEmpty(id))
         {

@@ -1,0 +1,29 @@
+﻿@namespace FT_Blazor.Components
+@using FT_Blazor.Models
+@using FT_Blazor.Components
+
+
+<MudPaper Class="pa-16 ma-2" Elevation="3">
+    <MudText Typo="Typo.h3">Ship List</MudText>
+    @foreach(string player in GameObject.Ships.Keys)
+    {   
+        <MudPaper Class="pa-16 ma-2" Elevation="1">
+            <MudText Typo="Typo.h4">@player</MudText>
+            @foreach(string shipId in GameObject.Ships[player])
+            {
+                <ShipSummary ShipId=@shipId/>
+            }
+        </MudPaper>
+    }
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Player { get; set; }
+
+    [Parameter, EditorRequired]
+    public Game? GameObject { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback RefreshParent { get; set; }
+}
