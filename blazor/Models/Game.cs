@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FT_Blazor.Models;
 
-internal class Game
+public class Game
 {
     [JsonProperty(PropertyName = "id")]
     public string Id { get; set; }

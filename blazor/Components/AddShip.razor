@@ -1,0 +1,62 @@
+﻿@namespace FT_Blazor.Components
+@using FT_Blazor.Models
+@using System.Text.Json;
+
+<MudPaper Class="pa-16 ma-2" Elevation="3">
+    <h3>Add a ship to your fleet</h3>
+    <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+        <MudTextField T="string" @bind-Value=@shipName Counter="50" MaxLength="50" Label="Ship Name" Required="true" RequiredError="Ship name is required!" />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>CreateShip())">Add ship to fleet</MudButton>
+    </MudForm>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Player { get; set; }
+
+    [Parameter, EditorRequired]
+    public Game? GameObject { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback RefreshParent { get; set; }
+
+    MudForm? form;
+    Boolean success = false;
+    string[] errors = { };
+    string baseURL = "https://ft-functions.azurewebsites.net/api/";
+    string shipName = "";
+
+    private async Task CreateShip()
+    {
+        form.Validate();
+        if (success)
+        {
+            string queryURL = baseURL + $"AddShip?ship_name={shipName}&id={GameObject.Id}&player={Player}";
+            HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+            HttpResponseMessage response = await client.GetAsync(client.BaseAddress);
+
+            if (response.Content is object && response.Content.Headers.ContentType.MediaType == "application/json")
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Ship _newShip = JsonSerializer.Deserialize<Ship>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                bool firstShip = !GameObject.Ships.ContainsKey(Player);
+                if (firstShip)
+                {
+                    List<string> shipList = new List<string>();
+                    shipList.Add(_newShip.Id);
+                    GameObject.Ships.Add(Player, shipList);
+                }
+                else
+                {
+                    List<string> shipList;
+                    GameObject.Ships.TryGetValue(Player, out shipList);
+                    shipList.Add(_newShip.Id);
+                    GameObject.Ships[Player] = shipList;
+                }
+                shipName = "";
+                await RefreshParent.InvokeAsync();
+            }
+        }
+    }
+}
