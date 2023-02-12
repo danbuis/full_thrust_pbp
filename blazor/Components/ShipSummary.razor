@@ -2,7 +2,12 @@
 @using FT_Blazor.Models
 @using System.Text.Json;
 @if (shipData is not null){
-    <MudText>@shipData.Name</MudText>
+    <tr>
+        <MudTd>@shipData.Name</MudTd>
+        <MudTd>@shipData.CurrentSpeed</MudTd>
+        <MudTd>@shipData.CurrentBearing</MudTd>
+        <MudTd>(@shipData.X , @shipData.Y)</MudTd>
+    </tr>
 }
 
 @code {
@@ -14,10 +19,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await GetShip();
+        await GetShip(ShipId);
     }
 
-    private async Task GetShip()
+    private async Task GetShip(string ShipId)
     {
         string queryURL = baseURL + $"GetShip?id={ShipId}";
         HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
