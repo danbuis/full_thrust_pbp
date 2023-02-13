@@ -59,7 +59,7 @@ else if (currentGame is not null)
     </MudPaper>
 
     <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState />
-    <ShipList ShipDict=@shipDict RefreshParent=@RefreshState />
+    <ShipList ShipDict=@shipDict/>
 }
 
 
@@ -90,7 +90,7 @@ else if (currentGame is not null)
     protected override async Task OnInitializedAsync()
     {
         await GetGame();
-        shipDict = BuildShipDicts(currentGame);
+        await BuildShipDicts(currentGame);
     }
 
     private async Task SignUp()
@@ -116,8 +116,10 @@ else if (currentGame is not null)
         }
     }
 
-    public void RefreshState()
+    public async Task RefreshState()
     {
+        await GetGame();
+        await BuildShipDicts(currentGame);
         this.StateHasChanged();
     }
 
@@ -155,20 +157,20 @@ else if (currentGame is not null)
         }
     }
 
-    private Dictionary<string, List<Ship>> BuildShipDicts(Game game)
+    private async Task BuildShipDicts(Game game)
     {
-        Dictionary<string, List<Ship>> shipDict = new Dictionary<string, List<Ship>>();
+        Dictionary<string, List<Ship>> shipDictNew = new Dictionary<string, List<Ship>>();
 
         foreach(string player in game.Ships.Keys)
         {
             List<Ship> ships= new List<Ship>();
             foreach(string shipId in game.Ships[player])
             {
-                 GetShip(shipId, ships);
+                 await GetShip(shipId, ships);
             }
-            shipDict[player] = ships;
+            shipDictNew[player] = ships;
         }
-        return shipDict;
+        shipDict = shipDictNew;
     }
 
     private async Task GetShip(string ShipId, List<Ship> shipList)
