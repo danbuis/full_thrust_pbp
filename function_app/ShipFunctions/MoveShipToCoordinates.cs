@@ -55,8 +55,8 @@ namespace FT_Functions.ShipFunctions
 
             shipDocument.SetPropertyValue("x", newX);
             shipDocument.SetPropertyValue("y", newY);
-            shipDocument.SetPropertyValue("speed", newSpeed);
-            shipDocument.SetPropertyValue("bearing", newBearing);
+            shipDocument.SetPropertyValue("currentSpeed", newSpeed);
+            shipDocument.SetPropertyValue("currentBearing", newBearing);
 
             await shipContainer.ReplaceDocumentAsync(shipDocument.SelfLink, shipDocument);
 
