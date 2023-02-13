@@ -4,26 +4,114 @@
 
 
 <MudPaper Class="pa-16 ma-2" Elevation="3">
-    <MudText Typo="Typo.h3">Ship List</MudText>
-    @foreach(string player in GameObject.Ships.Keys)
-    {   
-        <MudPaper Class="pa-16 ma-2" Elevation="1">
-            <MudText Typo="Typo.h4">@player</MudText>
-            @foreach(string shipId in GameObject.Ships[player])
-            {
-                <ShipSummary ShipId=@shipId/>
-            }
-        </MudPaper>
+    @foreach(string player in ShipDict.Keys)
+    {     
+        <MudText Typo="Typo.h4">@player's Ships</MudText>
+        @if(player == loggedInPlayer)
+        {
+            <MudText>Click on a row to edit the data</MudText>
+        }
+        <MudTable Items=ShipDict[player]
+              Hover="true" 
+              ReadOnly=@(player != loggedInPlayer)
+              CanCancelEdit="false" 
+              @bind-SelectedItem="selectedItem1" 
+              CommitEditTooltip="Commit Edit"
+              RowEditPreview="BackupItem" 
+              RowEditCancel="ResetItemToOriginalValues"
+              RowEditCommit="ItemHasBeenCommitted" 
+              IsEditRowSwitchingBlocked="false" 
+              ApplyButtonPosition="TableApplyButtonPosition.End"
+              EditButtonPosition="TableEditButtonPosition.End"
+              EditTrigger="TableEditTrigger.RowClick">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Speed</MudTh>
+                <MudTh>Bearing</MudTh>
+                <MudTh>X-coordinate</MudTh>
+                <MudTh>Y-coordinate</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Name</MudTd>
+                <MudTd>@context.CurrentSpeed</MudTd>
+                <MudTd>@context.CurrentBearing</MudTd>
+                <MudTd>@context.X</MudTd>
+                <MudTd>@context.Y</MudTd>
+            </RowTemplate>
+            <RowEditingTemplate>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Speed">
+                    <MudNumericField @bind-Value="@context.CurrentSpeed" Required Min="0" />
+                </MudTd>
+                <MudTd DataLabel="Bearing">
+                    <MudNumericField @bind-Value="@context.CurrentBearing" Required Min="0" Max="12" />
+                </MudTd>
+                <MudTd DataLabel="X-coordinate">
+                    <MudTextField @bind-Value="@context.X" Required />
+                </MudTd>
+                <MudTd DataLabel="Y-coordinate">
+                    <MudTextField @bind-Value="@context.Y" Required />
+                </MudTd>
+    </RowEditingTemplate>
+        </MudTable>
     }
 </MudPaper>
 
 @code {
     [Parameter, EditorRequired]
-    public string Player { get; set; }
+    public Dictionary<string, List<Ship>> ShipDict { get; set; }
 
     [Parameter, EditorRequired]
-    public Game? GameObject { get; set; }
+    public string loggedInPlayer { get; set; }
 
-    [Parameter, EditorRequired]
+    [Parameter]
     public EventCallback RefreshParent { get; set; }
+
+    private Ship selectedItem1 = null;
+    private Ship shipBeforeEdit = null;
+    string baseURL = "https://ft-functions.azurewebsites.net/api/";
+
+    private async Task MoveShip(object ship)
+    {
+        string Id = ((Ship)ship).Id;
+        int CurrentSpeed = ((Ship)ship).CurrentSpeed;
+        int CurrentBearing = ((Ship)ship).CurrentBearing % 12;
+        float X = ((Ship)ship).X;
+        float Y = ((Ship)ship).Y;
+        string queryURL = baseURL + $"MoveShipToCoordinates?id={Id}&bearing={CurrentBearing}&speed={CurrentSpeed}&x={X}&y={Y}";
+
+        HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+        HttpResponseMessage response = await client.PutAsync(client.BaseAddress, null);
+
+        StateHasChanged();  
+    }
+
+    private void BackupItem(object ship)
+    {
+        shipBeforeEdit = new()
+            {
+                Name = ((Ship)ship).Name,
+                CurrentSpeed = ((Ship)ship).CurrentSpeed,
+                CurrentBearing = ((Ship)ship).CurrentBearing,
+                X = ((Ship)ship).X,
+                Y = ((Ship)ship).Y
+            };
+        StateHasChanged();
+    }
+
+    private void ResetItemToOriginalValues(object ship)
+    {
+        ((Ship)ship).Name = shipBeforeEdit.Name;
+        ((Ship)ship).CurrentSpeed = shipBeforeEdit.CurrentSpeed;
+        ((Ship)ship).CurrentBearing = shipBeforeEdit.CurrentBearing;
+        ((Ship)ship).X = shipBeforeEdit.X;
+        ((Ship)ship).Y = shipBeforeEdit.Y;
+        StateHasChanged();
+    }
+
+    private void ItemHasBeenCommitted(object ship)
+    {
+        MoveShip(ship);
+        StateHasChanged();
+    }
 }

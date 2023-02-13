@@ -58,15 +58,14 @@ else if (currentGame is not null)
         <MudText>Congratulations on signing into the game!  #smiley</MudText>
     </MudPaper>
 
-    <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState/>
+    <ShipList ShipDict=@shipDict loggedInPlayer=@loggedInPlayer />
 
-    <ShipList Player=@loggedInPlayer GameObject=@currentGame RefreshParent=@RefreshState />
-
+    <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState />
 }
 
 
 @code {
-    //25e180a4-5bfd-49d0-be22-23cef3857c0f
+    //268a956f-a9ee-4dd5-9d73-445074506287
     MudForm? addPlayerForm;
     Boolean addPlayerSuccess = false;
     string[] addPlayerErrors = { };
@@ -83,6 +82,7 @@ else if (currentGame is not null)
     string? newPassword = null;
     string? currentPassword = null;
     Game? currentGame = null;
+    Dictionary<string, List<Ship>> shipDict;
     string baseURL = "https://ft-functions.azurewebsites.net/api/";
 
     [Parameter]
@@ -91,6 +91,7 @@ else if (currentGame is not null)
     protected override async Task OnInitializedAsync()
     {
         await GetGame();
+        await BuildShipDicts(currentGame);
     }
 
     private async Task SignUp()
@@ -116,8 +117,10 @@ else if (currentGame is not null)
         }
     }
 
-    public void RefreshState()
+    public async Task RefreshState()
     {
+        await GetGame();
+        await BuildShipDicts(currentGame);
         this.StateHasChanged();
     }
 
@@ -152,6 +155,39 @@ else if (currentGame is not null)
             var content = await response.Content.ReadAsStringAsync();
             Game newCurrentGame = JsonSerializer.Deserialize<Game>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             currentGame = newCurrentGame;
+        }
+    }
+
+    private async Task BuildShipDicts(Game game)
+    {
+        Dictionary<string, List<Ship>> shipDictNew = new Dictionary<string, List<Ship>>();
+
+        foreach(string player in game.Ships.Keys)
+        {
+            List<Ship> ships= new List<Ship>();
+            foreach(string shipId in game.Ships[player])
+            {
+                 await GetShip(shipId, ships);
+            }
+            shipDictNew[player] = ships;
+        }
+        shipDict = shipDictNew;
+    }
+
+    private async Task GetShip(string ShipId, List<Ship> shipList)
+    {
+        string queryURL = baseURL + $"GetShip?id={ShipId}";
+        HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+
+        HttpResponseMessage response = null;
+
+        response = await client.GetAsync(client.BaseAddress);
+
+        if (response.Content is object && response.Content.Headers.ContentType.MediaType == "application/json")
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            Ship shipResponse = JsonSerializer.Deserialize<Ship>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            shipList.Add(shipResponse);
         }
     }
 }
