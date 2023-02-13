@@ -58,8 +58,9 @@ else if (currentGame is not null)
         <MudText>Congratulations on signing into the game!  #smiley</MudText>
     </MudPaper>
 
+    <ShipList ShipDict=@shipDict loggedInPlayer=@loggedInPlayer />
+
     <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState />
-    <ShipList ShipDict=@shipDict/>
 }
 
 

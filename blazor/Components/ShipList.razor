@@ -9,7 +9,7 @@
         <MudText Typo="Typo.h4">@player's Ships</MudText>
         <MudTable Items=ShipDict[player]
               Hover="true" 
-              ReadOnly="false" 
+              ReadOnly=@(player != loggedInPlayer)
               CanCancelEdit="false" 
               @bind-SelectedItem="selectedItem1" 
               CommitEditTooltip="Commit Edit"
@@ -56,6 +56,9 @@
 @code {
     [Parameter, EditorRequired]
     public Dictionary<string, List<Ship>> ShipDict { get; set; }
+
+    [Parameter, EditorRequired]
+    public string loggedInPlayer { get; set; }
 
     [Parameter]
     public EventCallback RefreshParent { get; set; }
