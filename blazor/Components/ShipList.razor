@@ -7,6 +7,10 @@
     @foreach(string player in ShipDict.Keys)
     {     
         <MudText Typo="Typo.h4">@player's Ships</MudText>
+        @if(player == loggedInPlayer)
+        {
+            <MudText>Click on a row to edit the data</MudText>
+        }
         <MudTable Items=ShipDict[player]
               Hover="true" 
               ReadOnly=@(player != loggedInPlayer)
