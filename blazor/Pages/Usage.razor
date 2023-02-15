@@ -3,16 +3,12 @@
 <PageTitle>How to use this site</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Starting a new game</MudText>
-<MudText></MudText>
-<MudText Class="mb-4">Current count: @currentCount</MudText>
-<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">Click me</MudButton>
+<MudText>Starting a new game is as easy as filling out the form and hitting the button on the home page.  It will create a new empty game with a unique alphanumeric id.  Make a note of the id and keep it handy for later.  It is how you will invite other people to join your game.</MudText>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Joining a game</MudText>
+<MudText>To join a game that someone has invited you to, use the id you were given to first find the game, and then create a username/password combination.  Once you enter that you will be dropped into the main game page.  Returning players can use the sign in section to verify that they are permitted to access the information for a fleet.</MudText>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Adding ships to a game</MudText>
+<MudText>Use the Add Ship form to add a ship to your fleet.  Once it is in your fleet you can change its location, speed and heading on the table listing your ships.  When you are done adding and moving ships around you can finalize your deployment by clicking the button below the table.  Once all players have</MudText>
 
 
-@code {
-    private int currentCount = 0;
-
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
-}
