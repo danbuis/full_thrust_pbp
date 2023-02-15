@@ -53,19 +53,17 @@ else
 }
 else if (currentGame is not null)   
 {
-    <MudPaper>
-        <MudText>Welcome @loggedInPlayer</MudText>
-        <MudText>Congratulations on signing into the game!  #smiley</MudText>
-    </MudPaper>
-
-    <ShipList ShipDict=@shipDict loggedInPlayer=@loggedInPlayer />
+    @if(currentGame.Ships.ContainsKey(loggedInPlayer))
+    {
+        <ShipList ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame/>
+    }
 
     <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState />
 }
 
 
 @code {
-    //268a956f-a9ee-4dd5-9d73-445074506287
+    //996f2497-23e1-4b78-b008-9e5953720ff6
     MudForm? addPlayerForm;
     Boolean addPlayerSuccess = false;
     string[] addPlayerErrors = { };

@@ -6,14 +6,17 @@
 <MudPaper Class="pa-16 ma-2" Elevation="3">
     @foreach(string player in ShipDict.Keys)
     {     
-        <MudText Typo="Typo.h4">@player's Ships</MudText>
-        @if(player == loggedInPlayer)
+        
+        @if(player == loggedInPlayer && CurrentGame.Phase.Equals("deployment"))
         {
             <MudText>Click on a row to edit the data</MudText>
         }
-        <MudTable Items=ShipDict[player]
+        @if(player == loggedInPlayer || !CurrentGame.Phase.Equals("deployment"))
+        {
+            <MudText Typo="Typo.h4">@player's Ships</MudText>
+            <MudTable Items=ShipDict[player]
               Hover="true" 
-              ReadOnly=@(player != loggedInPlayer)
+              ReadOnly=@(!(CurrentGame.Phase.Equals("deployment") && !CurrentGame.PlayerSignoffs.Contains(player)))
               CanCancelEdit="false" 
               @bind-SelectedItem="selectedItem1" 
               CommitEditTooltip="Commit Edit"
@@ -52,8 +55,17 @@
                 <MudTd DataLabel="Y-coordinate">
                     <MudTextField @bind-Value="@context.Y" Required />
                 </MudTd>
-    </RowEditingTemplate>
+            </RowEditingTemplate>
         </MudTable>
+        @if (CurrentGame.Phase.Equals("deployment")){
+            if(player == loggedInPlayer && !CurrentGame.PlayerSignoffs.Contains(loggedInPlayer))
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>SignOff())">Lock in deployment</MudButton>
+                }else{
+                    <MudText>Deployment locked in</MudText>
+                }
+            }
+        }
     }
 </MudPaper>
 
@@ -64,12 +76,41 @@
     [Parameter, EditorRequired]
     public string loggedInPlayer { get; set; }
 
+    [Parameter, EditorRequired]
+    public Game CurrentGame { get; set; }
+
     [Parameter]
     public EventCallback RefreshParent { get; set; }
 
     private Ship selectedItem1 = null;
     private Ship shipBeforeEdit = null;
     string baseURL = "https://ft-functions.azurewebsites.net/api/";
+    string test;
+
+    private async Task SignOff()
+    {
+        string queryURL = baseURL + $"PlayerSignoff?id={CurrentGame.Id}&player={loggedInPlayer}";
+        test = queryURL;
+        HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+        HttpResponseMessage response = await client.PutAsync(client.BaseAddress, null);
+
+        if (!CurrentGame.PlayerSignoffs.Contains(loggedInPlayer))
+        {
+            CurrentGame.PlayerSignoffs.Add(loggedInPlayer);
+        }
+
+        if (CurrentGame.PlayerSignoffs.Count == CurrentGame.Players.Count)
+        {
+            string advancePhaseURL = baseURL + $"AdvancePhase?id={CurrentGame.Id}&phase=movement";
+            HttpClient advanceClient = new HttpClient { BaseAddress = new Uri(advancePhaseURL) };
+            HttpResponseMessage advanceResponse = await client.PutAsync(advanceClient.BaseAddress, null);
+
+            CurrentGame.PlayerSignoffs = new List<string>();
+            CurrentGame.Phase = "movement";
+        }
+
+        this.StateHasChanged();
+    }
 
     private async Task MoveShip(object ship)
     {

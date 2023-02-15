@@ -12,6 +12,9 @@ internal class Game
     [JsonProperty(PropertyName = "id")]
     public string Id { get; set; }
 
+    [JsonProperty(PropertyName = "phase")]
+    public string Phase { get; set; }
+
     [JsonProperty(PropertyName = "name")]
     public string Name { get; set; }
 
@@ -25,4 +28,7 @@ internal class Game
 
     [JsonProperty(PropertyName = "dateCreated")]
     public DateTime DateCreated { get; set; }
+
+    [JsonProperty(PropertyName = "playerSignoffs")]
+    public List<string> PlayerSignoffs { get; set; }
 }
