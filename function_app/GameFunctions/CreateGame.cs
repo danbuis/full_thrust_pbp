@@ -48,10 +48,12 @@ public class CreateGame
         {
             // Create a random ID.
             Id = Guid.NewGuid().ToString(),
+            Phase = "deployment",
             Name = name,
             Players = new Dictionary<string, string>(),
             Ships = new Dictionary<string, List<string>>(),
-            DateCreated = DateTime.Now
+            DateCreated = DateTime.Now,
+            PlayerSignoffs = new List<string>()
         };
 
         // Add a JSON document to the output container.
