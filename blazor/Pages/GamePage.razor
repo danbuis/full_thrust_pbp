@@ -60,13 +60,13 @@ else if (currentGame is not null)
     {
         <ShipList ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame/>
     }
-
+    <Ranges ShipDict=@shipDict loggedInPlayer=@loggedInPlayer />
     <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState ShipDict=@shipDict/>
 }
 
 
 @code {
-    //996f2497-23e1-4b78-b008-9e5953720ff6
+    //5c710415-5286-49ee-9386-09c92ea46f9f
     MudForm? addPlayerForm;
     Boolean addPlayerSuccess = false;
     string[] addPlayerErrors = { };

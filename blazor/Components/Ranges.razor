@@ -1,0 +1,88 @@
+﻿@namespace FT_Blazor.Components
+@using FT_Blazor.Models
+
+<h3>Ranges and Bearings</h3>
+<MudSelect T="Ship" @bind-Value="sourceShip" Label="Ship to measure from" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined">
+    @foreach(Ship ship in BuildShipList(true, true))
+    {
+        <MudSelectItem Value=@ship>@ship.Name</MudSelectItem>
+    }
+</MudSelect>
+@if (sourceShip is not null)
+{
+    <MudTable Items=@BuildShipList(true, true)
+              Hover="true" 
+              ReadOnly="true"
+              CanCancelEdit="false" 
+    >
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Speed</MudTh>
+                <MudTh>Bearing</MudTh>
+                <MudTh>Range</MudTh>
+                <MudTh>Relative Bearing</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Name</MudTd>
+                <MudTd>@context.CurrentSpeed</MudTd>
+                <MudTd>@context.CurrentBearing</MudTd>
+                <MudTd>@CalculateDistance(sourceShip, context)</MudTd>
+                <MudTd>@CalculateRelativeBearing(sourceShip, context)</MudTd>
+            </RowTemplate>
+        </MudTable>
+        }
+        
+
+@code {
+    [Parameter, EditorRequired]
+    public Dictionary<string, List<Ship>> ShipDict { get; set; }
+
+    [Parameter, EditorRequired]
+    public string loggedInPlayer { get; set; }
+
+    bool includePlayerShips = true;
+    bool includeNonPlayerShips = true;
+    Ship sourceShip;
+
+    private double CalculateDistance(Ship source, Ship target)
+    {
+        float deltaX = source.X - target.X;
+        float deltaY = source.Y - target.Y;
+
+        return Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+    }
+
+    private double CalculateRelativeBearing(Ship source, Ship target)
+    {
+        float deltaX = source.X - target.X;
+        float deltaY = source.Y - target.Y;
+
+        double absoluteBearing = Math.Atan2(deltaX, deltaY);
+        return absoluteBearing;
+    }
+
+    private List<Ship> BuildShipList(bool playerShips, bool nonPlayerShips)
+    {
+        List<Ship> ships = new List<Ship>();
+
+        foreach(string player in ShipDict.Keys)
+        {
+            if (player.Equals(loggedInPlayer) && playerShips)
+            {
+                foreach(Ship ship in ShipDict[player])
+                {
+                    ships.Add(ship);
+                }
+            }
+            else if (nonPlayerShips)
+            {
+                foreach (Ship ship in ShipDict[player])
+                {
+                    ships.Add(ship);
+                }
+            }
+        }
+
+        return ships;
+    }
+}
