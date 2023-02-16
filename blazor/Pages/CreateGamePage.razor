@@ -15,6 +15,7 @@
         <MudPaper Class="pa-16 ma-2" Elevation="3">
             <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
                 <MudTextField T="string" @bind-Value=@Name Counter="50" MaxLength="50" Label="New Game's name'" Required="true" RequiredError="Game Name is required!" />
+                <MudNumericField T="int" @bind-Value=@playerCount Min=2 Label="Number of players"/>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>CreateGame())">Create Game</MudButton>
             </MudForm>
         </MudPaper>
@@ -28,6 +29,7 @@
 
 @code {
     string Name = "";
+    int playerCount = 2;
     string baseURL = "https://ft-functions.azurewebsites.net/api/";
     string updateString = "";
     string responseReceived = "";
@@ -42,7 +44,7 @@
         if (success)
         {
             updateString = "creating yout game";
-            string queryURL = baseURL + $"CreateGame?name={Name}";
+            string queryURL = baseURL + $"CreateGame?name={Name}&players={playerCount}";
             HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
             HttpResponseMessage response = await client.GetAsync(client.BaseAddress);
             responseReceived = await response.Content.ReadAsStringAsync();
