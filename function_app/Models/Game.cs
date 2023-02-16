@@ -31,4 +31,7 @@ internal class Game
 
     [JsonProperty(PropertyName = "playerSignoffs")]
     public List<string> PlayerSignoffs { get; set; }
+
+    [JsonProperty(PropertyName = "playerCount")]
+    public int PlayerCount { get; set; }
 }
