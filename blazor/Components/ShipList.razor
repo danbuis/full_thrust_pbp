@@ -99,7 +99,7 @@
             CurrentGame.PlayerSignoffs.Add(loggedInPlayer);
         }
 
-        if (CurrentGame.PlayerSignoffs.Count == CurrentGame.Players.Count)
+        if (CurrentGame.PlayerSignoffs.Count == CurrentGame.PlayerCount)
         {
             string advancePhaseURL = baseURL + $"AdvancePhase?id={CurrentGame.Id}&phase=movement";
             HttpClient advanceClient = new HttpClient { BaseAddress = new Uri(advancePhaseURL) };
