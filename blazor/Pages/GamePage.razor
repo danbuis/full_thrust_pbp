@@ -17,8 +17,10 @@ else
         <h2>@Id</h2>
         <MudText>You have not signed in yet, please either sign in, or add a username/login pair to this game to join it. </MudText>
     </MudPaper>
-    <MudPaper Class="pa-16 ma-2" Elevation="3">
-        <MudText>Sign up as a new player</MudText>
+    @if (currentGame.PlayerCount != currentGame.Players.Count)
+    {
+        <MudPaper Class="pa-16 ma-2" Elevation="3">
+            <MudText>Sign up as a new player</MudText>
         <MudForm @ref="addPlayerForm" @bind-IsValid="@addPlayerSuccess" @bind-Errors="@addPlayerErrors">
             <MudTextField T="string" @bind-Value=@newPlayerName 
                           Label="New player name" 
@@ -31,6 +33,7 @@ else
             <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>SignUp())">Sign up</MudButton>
         </MudForm>
     </MudPaper>
+    }
     @if (currentGame != null && currentGame.Players.Count != 0)
     {
         <MudPaper Class="pa-16 ma-2" Elevation="3">
@@ -58,7 +61,7 @@ else if (currentGame is not null)
         <ShipList ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame/>
     }
 
-    <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState />
+    <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState ShipDict=@shipDict/>
 }
 
 

@@ -28,6 +28,7 @@ public class CreateGame
     [FunctionName("CreateGame")]
     [OpenApiOperation(operationId: "Run", tags: new[] { "Create Game" })]
     [OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
+    [OpenApiParameter(name: "players", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The **Players** parameter")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)]
@@ -43,6 +44,7 @@ public class CreateGame
         _logger.LogInformation("C# HTTP trigger function processed a request.");
 
         string name = req.Query["name"];
+        int playerCount = int.Parse(req.Query["players"]);
 
         Game testGameToAdd = new()
         {
@@ -53,7 +55,8 @@ public class CreateGame
             Players = new Dictionary<string, string>(),
             Ships = new Dictionary<string, List<string>>(),
             DateCreated = DateTime.Now,
-            PlayerSignoffs = new List<string>()
+            PlayerSignoffs = new List<string>(),
+            PlayerCount = playerCount
         };
 
         // Add a JSON document to the output container.
