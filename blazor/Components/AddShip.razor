@@ -5,7 +5,13 @@
 <MudPaper Class="pa-16 ma-2" Elevation="3">
     <h3>Add a ship to your fleet</h3>
     <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
-        <MudTextField T="string" @bind-Value=@shipName Counter="50" MaxLength="50" Label="Ship Name" Required="true" RequiredError="Ship name is required!" />
+        <MudTextField T="string" @bind-Value=@shipName 
+                      Counter="50" 
+                      MaxLength="50" 
+                      Label="Ship Name" 
+                      Validation="@(new Func<string, string>(UniqueName))" 
+                      Required="true" 
+                      RequiredError="Ship name is required!" />
         <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>CreateShip())">Add ship to fleet</MudButton>
     </MudForm>
 </MudPaper>
@@ -18,6 +24,9 @@
     public Game? GameObject { get; set; }
 
     [Parameter, EditorRequired]
+    public Dictionary<string,List<Ship>>? ShipDict { get; set; }
+
+    [Parameter, EditorRequired]
     public EventCallback RefreshParent { get; set; }
 
     MudForm? form;
@@ -25,6 +34,21 @@
     string[] errors = { };
     string baseURL = "https://ft-functions.azurewebsites.net/api/";
     string shipName = "";
+
+    private string UniqueName(string arg)
+    {
+        if (ShipDict.ContainsKey(Player))
+        {
+            foreach (Ship ship in ShipDict[Player])
+            {
+                if (ship.Name == arg)
+                {
+                    return "Already a ship with that name in your fleet";
+                }
+            }
+        }
+        return null;
+    }
 
     private async Task CreateShip()
     {
