@@ -1,35 +1,49 @@
 ﻿@namespace FT_Blazor.Components
 @using FT_Blazor.Models
 
-<h3>Ranges and Bearings</h3>
-<MudSelect T="Ship" @bind-Value="sourceShip" Label="Ship to measure from" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined">
-    @foreach (Ship ship in BuildShipList(true, !CurrentGame.Phase.Equals("deployment")))
-    {
-        <MudSelectItem Value=@ship>@ship.Name</MudSelectItem>
-    }
-</MudSelect>
-@if (sourceShip is not null)
-{
-    <MudTable Items=@BuildShipList(true, !CurrentGame.Phase.Equals("deployment"))
-              Hover="true" 
-              ReadOnly="true"
-              Filter="new Func<Ship,bool>(ExcludeCurrentShip)">
-        <HeaderContent>
-            <MudTh>Name</MudTh>
-            <MudTh>Speed</MudTh>
-            <MudTh>Bearing</MudTh>
-            <MudTh>Range</MudTh>
-            <MudTh>Relative Bearing</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd>@context.Name</MudTd>
-            <MudTd>@context.CurrentSpeed</MudTd>
-            <MudTd>@context.CurrentBearing</MudTd>
-            <MudTd>@CalculateDistance(sourceShip, context)</MudTd>
-            <MudTd>@CalculateRelativeBearing(sourceShip, context)</MudTd>
-        </RowTemplate>
-    </MudTable>
-    }
+
+<MudPaper Class="pa-16 ma-2" Elevation="3">
+    <MudText Typo="Typo.h4">Ranges and Bearings</MudText>
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="Ship" @bind-Value="sourceShip" Label="Ship to measure from" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined">
+                @foreach (Ship ship in BuildShipList(true, !CurrentGame.Phase.Equals("deployment")))
+                {
+                    <MudSelectItem Value=@ship>@ship.Name</MudSelectItem>
+                }
+            </MudSelect>
+            @if (!CurrentGame.Phase.Equals("deployment") && sourceShip is not null)
+            {
+                <MudSwitch @bind-Checked="@includePlayerShips" Color="Color.Primary" UnCheckedColor="Color.Error" Label="List your ships" />
+                <MudSwitch @bind-Checked="@includeNonPlayerShips" Color="Color.Primary" UnCheckedColor="Color.Error" Label="List opposing ships" />
+            }
+        </MudItem>
+        <MudItem>
+            @if (sourceShip is not null)
+            {
+                <MudTable Items=@BuildShipList(includePlayerShips, (!CurrentGame.Phase.Equals("deployment") && includeNonPlayerShips))
+                          Hover="true" 
+                          ReadOnly="true"
+                          Filter="new Func<Ship,bool>(ExcludeCurrentShip)">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Speed</MudTh>
+                        <MudTh>Bearing</MudTh>
+                        <MudTh>Range</MudTh>
+                        <MudTh>Relative Bearing</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>@context.CurrentSpeed</MudTd>
+                        <MudTd>@context.CurrentBearing</MudTd>
+                        <MudTd>@CalculateDistance(sourceShip, context)</MudTd>
+                        <MudTd>@CalculateRelativeBearing(sourceShip, context)</MudTd>
+                    </RowTemplate>
+                </MudTable>
+                }
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
         
 
 @code {
@@ -92,7 +106,7 @@
                     ships.Add(ship);
                 }
             }
-            else if (nonPlayerShips)
+            else if (!player.Equals(loggedInPlayer) && nonPlayerShips)
             {
                 foreach (Ship ship in ShipDict[player])
                 {
