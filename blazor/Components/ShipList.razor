@@ -79,7 +79,7 @@
     [Parameter, EditorRequired]
     public Game CurrentGame { get; set; }
 
-    [Parameter]
+    [Parameter, EditorRequired]
     public EventCallback RefreshParent { get; set; }
 
     private Ship selectedItem1 = null;
@@ -124,7 +124,7 @@
         HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
         HttpResponseMessage response = await client.PutAsync(client.BaseAddress, null);
 
-        StateHasChanged();  
+        await RefreshParent.InvokeAsync(); 
     }
 
     private void BackupItem(object ship)
