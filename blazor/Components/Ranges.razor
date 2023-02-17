@@ -3,7 +3,7 @@
 
 <h3>Ranges and Bearings</h3>
 <MudSelect T="Ship" @bind-Value="sourceShip" Label="Ship to measure from" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined">
-    @foreach(Ship ship in BuildShipList(true, true))
+    @foreach (Ship ship in BuildShipList(true, !CurrentGame.Phase.Equals("deployment")))
     {
         <MudSelectItem Value=@ship>@ship.Name</MudSelectItem>
     }
@@ -74,7 +74,6 @@
     private List<Ship> BuildShipList(bool playerShips, bool nonPlayerShips)
     {
         List<Ship> ships = new List<Ship>();
-
         foreach(string player in ShipDict.Keys)
         {
             if (player.Equals(loggedInPlayer) && playerShips)
