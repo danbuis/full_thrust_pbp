@@ -59,14 +59,14 @@ else if (currentGame is not null)
     @if(currentGame.Ships.ContainsKey(loggedInPlayer))
     {
         <ShipList ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame/>
-    }
-    <Ranges ShipDict=@shipDict loggedInPlayer=@loggedInPlayer />
+        <Ranges ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame />
+    }   
     <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState ShipDict=@shipDict/>
 }
 
 
 @code {
-    //5c710415-5286-49ee-9386-09c92ea46f9f
+    //446e844a-98a9-464e-86a9-859ef424b12c
     MudForm? addPlayerForm;
     Boolean addPlayerSuccess = false;
     string[] addPlayerErrors = { };
