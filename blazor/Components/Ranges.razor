@@ -17,6 +17,8 @@
                 <MudSwitch @bind-Checked="@includePlayerShips" Color="Color.Primary" UnCheckedColor="Color.Error" Label="List your ships" />
                 <MudSwitch @bind-Checked="@includeNonPlayerShips" Color="Color.Primary" UnCheckedColor="Color.Error" Label="List opposing ships" />
             }
+            <MudText>Bearing 0 is due north in the play space.  Bearing 3 is due east.</MudText>
+            <MudText>A relative bearing of 0 is dead ahead.  A relative bearing of 90 means the other ship is directly to the right (starboard).  A relative bearing of -90 means the other ship is directly to the right.</MudText>
         </MudItem>
         <MudItem xs="12" sm="8">
             @if (sourceShip is not null)
