@@ -18,7 +18,7 @@
                 <MudSwitch @bind-Checked="@includeNonPlayerShips" Color="Color.Primary" UnCheckedColor="Color.Error" Label="List opposing ships" />
             }
         </MudItem>
-        <MudItem>
+        <MudItem xs="12" sm="8">
             @if (sourceShip is not null)
             {
                 <MudTable Items=@BuildShipList(includePlayerShips, (!CurrentGame.Phase.Equals("deployment") && includeNonPlayerShips))
@@ -36,8 +36,8 @@
                         <MudTd>@context.Name</MudTd>
                         <MudTd>@context.CurrentSpeed</MudTd>
                         <MudTd>@context.CurrentBearing</MudTd>
-                        <MudTd>@CalculateDistance(sourceShip, context)</MudTd>
-                        <MudTd>@CalculateRelativeBearing(sourceShip, context)</MudTd>
+                        <MudTd>@Math.Round((double)CalculateDistance(sourceShip, context),3)</MudTd>
+                        <MudTd>@Math.Round((double)CalculateRelativeBearing(sourceShip, context),3)</MudTd>
                     </RowTemplate>
                 </MudTable>
                 }
