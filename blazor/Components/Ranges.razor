@@ -65,9 +65,9 @@
         double correctedAbsoluteBearing = (360 + absoluteBearing - 90) % 360;
 
         //ship absolute bearing
-        double shipAbsoluteBearing = source.CurrentBearing * 30;
+        double shipAbsoluteBearing = source.CurrentBearing * -30;
 
-        double relativeBearing = shipAbsoluteBearing - correctedAbsoluteBearing - 180;
+        double relativeBearing = -(correctedAbsoluteBearing - shipAbsoluteBearing - 180);
         return relativeBearing;
     }
 
