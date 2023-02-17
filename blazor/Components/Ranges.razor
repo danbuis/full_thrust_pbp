@@ -56,18 +56,27 @@
 
     private double CalculateRelativeBearing(Ship source, Ship target)
     {
-        float deltaX = source.X - target.X;
-        float deltaY = source.Y - target.Y;
+        float deltaX = target.X - source.X;
+        float deltaY = target.Y - source.Y;
 
-        // E is 0, S is 90
+        // E is 0, N is 90
         double absoluteBearing = (180 / Math.PI) * Math.Atan2(deltaY, deltaX);
         //make N 0, and E 90, W 270
-        double correctedAbsoluteBearing = (360 + absoluteBearing - 90) % 360;
+        double correctedAbsoluteBearing = (-absoluteBearing +90);
+        if(correctedAbsoluteBearing > 180)
+        {
+            correctedAbsoluteBearing -= 360;
+        }
 
         //ship absolute bearing
-        double shipAbsoluteBearing = source.CurrentBearing * -30;
+        double shipAbsoluteBearing = source.CurrentBearing * 30;
 
-        double relativeBearing = -(correctedAbsoluteBearing - shipAbsoluteBearing - 180);
+        double relativeBearing = correctedAbsoluteBearing - shipAbsoluteBearing;
+        if(relativeBearing < -180)
+        {
+            relativeBearing += 360;
+        }
+
         return relativeBearing;
     }
 
