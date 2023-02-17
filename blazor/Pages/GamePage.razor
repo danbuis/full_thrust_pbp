@@ -58,7 +58,7 @@ else if (currentGame is not null)
 {
     @if(currentGame.Ships.ContainsKey(loggedInPlayer))
     {
-        <ShipList ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame/>
+        <ShipList ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame RefreshParent=@RefreshState />
         <Ranges ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame />
     }   
     <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState ShipDict=@shipDict/>
