@@ -1,0 +1,129 @@
+﻿@namespace FT_Blazor.Components
+@using FT_Blazor.Models
+
+
+<MudPaper Class="pa-16 ma-2" Elevation="3">
+    <MudText Typo="Typo.h4">Ranges and Bearings</MudText>
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="Ship" @bind-Value="sourceShip" Label="Ship to measure from" AnchorOrigin="Origin.BottomCenter" Variant="Variant.Outlined">
+                @foreach (Ship ship in BuildShipList(true, !CurrentGame.Phase.Equals("deployment"), "select"))
+                {
+                    <MudSelectItem Value=@ship>@ship.Name</MudSelectItem>
+                }
+            </MudSelect>
+            @if (!CurrentGame.Phase.Equals("deployment") && sourceShip is not null)
+            {
+                <MudSwitch @bind-Checked="@includePlayerShips" Color="Color.Primary" UnCheckedColor="Color.Error" Label="List your ships" />
+                <MudSwitch @bind-Checked="@includeNonPlayerShips" Color="Color.Primary" UnCheckedColor="Color.Error" Label="List opposing ships" />
+            }
+            <MudText>Bearing 0 is due north in the play space.  Bearing 3 is due east.</MudText>
+            <MudText>A relative bearing of 0 is dead ahead.  A relative bearing of 90 means the other ship is directly to the right (starboard).  A relative bearing of -90 means the other ship is directly to the left (port).</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="8">
+            <MudTable Items=@BuildShipList(includePlayerShips, (!CurrentGame.Phase.Equals("deployment") && includeNonPlayerShips), null)
+                        Hover="true" 
+                        ReadOnly="true"
+                        Filter="new Func<Ship,bool>(ExcludeCurrentShip)">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Speed</MudTh>
+                    <MudTh>Bearing</MudTh>
+                    <MudTh>Range</MudTh>
+                    <MudTh>Relative Bearing</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.Name</MudTd>
+                    <MudTd>@context.CurrentSpeed</MudTd>
+                    <MudTd>@context.CurrentBearing</MudTd>
+                    <MudTd>@Math.Round((double)CalculateDistance(sourceShip, context),3)</MudTd>
+                    <MudTd>@Math.Round((double)CalculateRelativeBearing(sourceShip, context),3)</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+        
+
+@code {
+    [Parameter, EditorRequired]
+    public Dictionary<string, List<Ship>> ShipDict { get; set; }
+
+    [Parameter, EditorRequired]
+    public string loggedInPlayer { get; set; }
+
+    [Parameter, EditorRequired]
+    public Game CurrentGame { get; set; }
+
+    bool includePlayerShips = true;
+    bool includeNonPlayerShips = true;
+    Ship sourceShip;
+
+    private double CalculateDistance(Ship source, Ship target)
+    {
+        float deltaX = source.X - target.X;
+        float deltaY = source.Y - target.Y;
+
+        return Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+    }
+
+    private double CalculateRelativeBearing(Ship source, Ship target)
+    {
+        float deltaX = target.X - source.X;
+        float deltaY = target.Y - source.Y;
+
+        // E is 0, N is 90
+        double absoluteBearing = (180 / Math.PI) * Math.Atan2(deltaY, deltaX);
+        //make N 0, and E 90, W 270
+        double correctedAbsoluteBearing = (-absoluteBearing +90);
+        if(correctedAbsoluteBearing > 180)
+        {
+            correctedAbsoluteBearing -= 360;
+        }
+
+        //ship absolute bearing
+        double shipAbsoluteBearing = source.CurrentBearing * 30;
+
+        double relativeBearing = correctedAbsoluteBearing - shipAbsoluteBearing;
+        if(relativeBearing < -180)
+        {
+            relativeBearing += 360;
+        }
+
+        return relativeBearing;
+    }
+
+    private List<Ship> BuildShipList(bool playerShips, bool nonPlayerShips, string reason)
+    {
+        List<Ship> ships = new List<Ship>();
+        if(sourceShip is null && reason is null)
+        {
+            return ships;
+        }
+        foreach(string player in ShipDict.Keys)
+        {
+            if (player.Equals(loggedInPlayer) && playerShips)
+            {
+                foreach(Ship ship in ShipDict[player])
+                {
+                    ships.Add(ship);
+                }
+            }
+            else if (!player.Equals(loggedInPlayer) && nonPlayerShips)
+            {
+                foreach (Ship ship in ShipDict[player])
+                {
+                    ships.Add(ship);
+                }
+            }
+        }
+        return ships;
+    }
+
+    private bool ExcludeCurrentShip(Ship shipInRow)
+    {
+        if (shipInRow == sourceShip)
+            return false;
+        return true;
+    }
+}
