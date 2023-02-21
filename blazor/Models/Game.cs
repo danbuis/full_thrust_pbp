@@ -26,6 +26,10 @@ public class Game
     [JsonProperty(PropertyName = "ships")]
     public Dictionary<string, List<string>> Ships { get; set; }
 
+    //<player, List<id>>
+    [JsonProperty(PropertyName = "launchedItesm")]
+    public Dictionary<string, List<string>> LaunchedItems { get; set; }
+
     [JsonProperty(PropertyName = "dateCreated")]
     public DateTime DateCreated { get; set; }
 
@@ -34,4 +38,19 @@ public class Game
 
     [JsonProperty(PropertyName = "playerCount")]
     public int PlayerCount { get; set; }
+
+    [JsonProperty(PropertyName = "GameDimensions")]
+    public double[] Dimensions { get; set; }
+
+    [JsonProperty(PropertyName = "PlanetLocation")]
+    public double[]? PlanetLocation { get; set; }
+
+    [JsonProperty(PropertyName = "GateLocation")]
+    public double[]? GateLocation { get; set; }
+
+    [JsonProperty(PropertyName = "GateBearing")]
+    public int? GateBearing { get; set; }
+
+    [JsonProperty(PropertyName = "Log")]
+    public string[] Log { get; set; }
 }

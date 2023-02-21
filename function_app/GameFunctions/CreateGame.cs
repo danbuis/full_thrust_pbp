@@ -45,6 +45,8 @@ public class CreateGame
 
         string name = req.Query["name"];
         int playerCount = int.Parse(req.Query["players"]);
+        double[] dims = { 100, 120 };
+        string[] gameLog = { };
 
         Game testGameToAdd = new()
         {
@@ -54,9 +56,12 @@ public class CreateGame
             Name = name,
             Players = new Dictionary<string, string>(),
             Ships = new Dictionary<string, List<string>>(),
+            LaunchedItems = new Dictionary<string, List<string>>(),
             DateCreated = DateTime.Now,
             PlayerSignoffs = new List<string>(),
-            PlayerCount = playerCount
+            PlayerCount = playerCount,
+            Dimensions = dims,
+            Log = gameLog
         };
 
         // Add a JSON document to the output container.
