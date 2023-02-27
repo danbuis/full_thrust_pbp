@@ -40,7 +40,7 @@ public class Game
     public int PlayerCount { get; set; }
 
     [JsonProperty(PropertyName = "GameDimensions")]
-    public double[] Dimensions { get; set; }
+    public double[] GameDimensions { get; set; }
 
     [JsonProperty(PropertyName = "PlanetLocation")]
     public double[]? PlanetLocation { get; set; }
