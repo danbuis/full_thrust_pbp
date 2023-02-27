@@ -1,6 +1,7 @@
 ﻿@namespace FT_Blazor.Components
 @using FT_Blazor.Models
 @using FT_Blazor.Components
+@inject ISnackbar Snackbar
 
 
 <MudPaper Class="pa-16 ma-2" Elevation="3">
@@ -112,13 +113,13 @@
         this.StateHasChanged();
     }
 
-    private async Task MoveShip(object ship)
+    private async Task MoveShip(Ship ship)
     {
-        string Id = ((Ship)ship).Id;
-        int CurrentSpeed = ((Ship)ship).CurrentSpeed;
-        int CurrentBearing = ((Ship)ship).CurrentBearing % 12;
-        float X = ((Ship)ship).X;
-        float Y = ((Ship)ship).Y;
+        string Id = ship.Id;
+        int CurrentSpeed = ship.CurrentSpeed;
+        int CurrentBearing = ship.CurrentBearing % 12;
+        float X = ship.X;
+        float Y = ship.Y;
         string queryURL = baseURL + $"MoveShipToCoordinates?id={Id}&bearing={CurrentBearing}&speed={CurrentSpeed}&x={X}&y={Y}";
 
         HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
@@ -152,7 +153,45 @@
 
     private void ItemHasBeenCommitted(object ship)
     {
-        MoveShip(ship);
+        Ship shipObj = FixDeploymentLocation(ship);
+        MoveShip(shipObj);
         StateHasChanged();
+    }
+
+    private Ship FixDeploymentLocation(object shipObj)
+    {
+        double xBound = CurrentGame.GameDimensions[0] / 2;
+        double yBound = CurrentGame.GameDimensions[1] / 2;
+        Ship ship = (Ship)shipObj;
+        bool inBounds = true;
+        if (Math.Abs(ship.X) > xBound)
+        {
+            inBounds = false;
+            if (ship.X > xBound)
+            {
+                ship.X = (float)xBound;
+            }
+            else
+            {
+                ship.X = (float)-xBound;
+            }
+        }
+        if (Math.Abs(ship.Y) > yBound)
+        {
+            inBounds = false;
+            if (ship.Y > yBound)
+            {
+                ship.Y = (float)yBound;
+            }
+            else
+            {
+                ship.Y = (float)-yBound;
+            }
+        }
+        if (!inBounds)
+        {
+            Snackbar.Add("Ship was placed out of bounds and has been moved back in bounds.");
+        }
+        return ship;
     }
 }
