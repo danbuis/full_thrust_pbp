@@ -1,0 +1,184 @@
+﻿@namespace FT_Blazor.Components
+@using FT_Blazor.Models
+@using FT_Blazor.Components
+@inject ISnackbar Snackbar
+
+
+<MudPaper Class="pa-16 ma-2" Elevation="3">
+
+    <MudText Typo="Typo.h4">Ship Manager</MudText>
+    <MudTable Items=ShipDict[loggedInPlayer]
+        Hover="true" 
+        CanCancelEdit="false" 
+        @bind-SelectedItem="selectedItem1" 
+        CommitEditTooltip="Commit Edit"
+        RowEditPreview="BackupItem" 
+        RowEditCancel="ResetItemToOriginalValues"
+        RowEditCommit="ItemHasBeenCommitted" 
+        IsEditRowSwitchingBlocked="false" 
+        ApplyButtonPosition="TableApplyButtonPosition.End"
+        EditButtonPosition="TableEditButtonPosition.End"
+        EditTrigger="TableEditTrigger.RowClick">
+    <HeaderContent>
+        <MudTh>Name</MudTh>
+        <MudTh>Current Speed</MudTh>
+        <MudTh>Current Bearing</MudTh>
+        <MudTh>Speed Change</MudTh>
+        <MudTh>Bearing Change</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Name</MudTd>
+        <MudTd>@context.CurrentSpeed</MudTd>
+        <MudTd>@context.CurrentBearing</MudTd>
+        <MudTd>@context.SpeedChange</MudTd>
+        <MudTd>@context.BearingChange</MudTd>
+    </RowTemplate>
+    <RowEditingTemplate>
+        <MudText>@context.Name</MudText>
+        <MudText>@context.CurrentSpeed</MudText>
+        <MudText>@context.CurrentBearing</MudText>
+        <MudTd DataLabel="Speed">
+                <MudNumericField @bind-Value="@context.SpeedChange" Required Min="0" />
+        </MudTd>
+        <MudTd DataLabel="Bearing">
+                <MudNumericField @bind-Value="@context.BearingChange" Required Min="0" Max="12" />
+        </MudTd>
+    </RowEditingTemplate>
+</MudTable>
+@if (CurrentGame.Phase.Equals("movement")){
+    if(!CurrentGame.PlayerSignoffs.Contains(loggedInPlayer))
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" OnClick="@(()=>SignOff())">Lock in navigation orders</MudButton>
+        }else{
+            <MudText>Movement locked in</MudText>
+        }
+    }
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public Dictionary<string, List<Ship>> ShipDict { get; set; }
+
+    [Parameter, EditorRequired]
+    public string loggedInPlayer { get; set; }
+
+    [Parameter, EditorRequired]
+    public Game CurrentGame { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback RefreshParent { get; set; }
+
+    private Ship selectedItem1 = null;
+    private Ship shipBeforeEdit = null;
+    string baseURL = "https://ft-functions.azurewebsites.net/api/";
+    string test;
+
+    private async Task SignOff()
+    {
+        string queryURL = baseURL + $"PlayerSignoff?id={CurrentGame.Id}&player={loggedInPlayer}";
+        test = queryURL;
+        HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+        HttpResponseMessage response = await client.PutAsync(client.BaseAddress, null);
+
+        if (!CurrentGame.PlayerSignoffs.Contains(loggedInPlayer))
+        {
+            CurrentGame.PlayerSignoffs.Add(loggedInPlayer);
+        }
+
+        if (CurrentGame.PlayerSignoffs.Count == CurrentGame.PlayerCount)
+        {
+            string advancePhaseURL = baseURL + $"AdvancePhase?id={CurrentGame.Id}&phase=shooting";
+            HttpClient advanceClient = new HttpClient { BaseAddress = new Uri(advancePhaseURL) };
+            HttpResponseMessage advanceResponse = await client.PutAsync(advanceClient.BaseAddress, null);
+            foreach (Ship ship in BuildShipList())
+            {
+                await MoveShipViaNavigation(ship);
+            }
+            CurrentGame.PlayerSignoffs = new List<string>();
+            CurrentGame.Phase = "shooting";
+        }
+
+        this.StateHasChanged();
+    }
+
+    private async Task MoveShipViaNavigation(Ship ship)
+    {
+        string Id = ship.Id;
+        int NewCurrentSpeed = ship.CurrentSpeed + ship.SpeedChange;
+        int NewCurrentBearing = (ship.CurrentBearing + ship.CurrentBearing) % 12;
+
+        int initialAngle = ship.CurrentBearing * 30;
+        int deltaBearing = NewCurrentBearing - ship.CurrentBearing;
+        int firstBearing = initialAngle + (int)Math.Floor(deltaBearing / 2.0) * 30;
+        int secondBearing = (deltaBearing - firstBearing * 30) + firstBearing;
+
+        int firstMove = (int)Math.Floor(NewCurrentSpeed / 2.0);
+        int secondMove = NewCurrentSpeed - firstMove;
+
+        double intermediateX = ship.X + Math.Sin(firstBearing) * firstMove;
+        double intermediateY = ship.Y + Math.Cos(firstBearing) * firstMove;
+
+        double X = intermediateX + Math.Sin(secondBearing) * secondMove;
+        double Y = intermediateY + Math.Cos(secondBearing) * secondMove;
+        string queryURL = baseURL + $"MoveShipToCoordinates?id={Id}&bearing={NewCurrentBearing}&speed={NewCurrentSpeed}&x={X}&y={Y}";
+
+        HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+        HttpResponseMessage response = await client.PutAsync(client.BaseAddress, null);
+
+        await RefreshParent.InvokeAsync(); 
+    }
+
+    private List<Ship> BuildShipList()
+    {
+        List<Ship> ships = new List<Ship>();
+        foreach (string player in ShipDict.Keys)
+        {
+            foreach (Ship ship in ShipDict[player])
+            {
+                ships.Add(ship);
+            }
+        }
+        return ships;
+    }
+
+    private async Task AssignNavigationOrders(Ship ship)
+    {
+        string Id = ship.Id;
+
+        string queryURL = baseURL + $"AssignNavigationOrders?id={Id}&speed={ship.SpeedChange}&bearing={ship.BearingChange}";
+
+        HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
+        HttpResponseMessage response = await client.PutAsync(client.BaseAddress, null);
+
+        await RefreshParent.InvokeAsync();
+    }
+
+    private void BackupItem(object ship)
+    {
+        shipBeforeEdit = new()
+            {
+                Name = ((Ship)ship).Name,
+                CurrentSpeed = ((Ship)ship).CurrentSpeed,
+                CurrentBearing = ((Ship)ship).CurrentBearing,
+                SpeedChange = ((Ship)ship).SpeedChange,
+                BearingChange = ((Ship)ship).BearingChange
+            };
+        StateHasChanged();
+    }
+
+    private void ResetItemToOriginalValues(object ship)
+    {
+        ((Ship)ship).Name = shipBeforeEdit.Name;
+        ((Ship)ship).CurrentSpeed = shipBeforeEdit.CurrentSpeed;
+        ((Ship)ship).CurrentBearing = shipBeforeEdit.CurrentBearing;
+        ((Ship)ship).SpeedChange = shipBeforeEdit.SpeedChange;
+        ((Ship)ship).BearingChange = shipBeforeEdit.BearingChange;
+        StateHasChanged();
+    }
+
+    private async void ItemHasBeenCommitted(object ship)
+    {
+        await AssignNavigationOrders((Ship)ship);
+        StateHasChanged();
+    }
+}

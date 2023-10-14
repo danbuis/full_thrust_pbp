@@ -60,13 +60,17 @@ else if (currentGame is not null)
     {
         <ShipList ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame RefreshParent=@RefreshState />
         <Ranges ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame />
+        @if(currentGame.Phase != "deployment"){
+            <ManageShips ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame RefreshParent=@RefreshState />
+        }
     }   
     <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState ShipDict=@shipDict/>
+    
 }
 
 
 @code {
-    //446e844a-98a9-464e-86a9-859ef424b12c
+    //f9a16ad5-a8dc-4d44-967d-817d70f88905
     MudForm? addPlayerForm;
     Boolean addPlayerSuccess = false;
     string[] addPlayerErrors = { };

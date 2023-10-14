@@ -36,8 +36,11 @@ internal class Ship
     [JsonProperty(PropertyName = "bearingChange")]
     public int BearingChange { get; set; }
 
-    [JsonProperty(PropertyName = "NavigationOrders")]
-    public int[] NavigationOrders { get; set; }
+    [JsonProperty(PropertyName = "NewSpeed")]
+    public int NewSpeed { get; set; }
+
+    [JsonProperty(PropertyName = "NewBearing")]
+    public int NewBearing { get; set; }
 
     [JsonProperty(PropertyName = "dateCreated")]
     public DateTime DateCreated { get; set; }
