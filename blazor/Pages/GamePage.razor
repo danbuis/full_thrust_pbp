@@ -65,6 +65,7 @@ else if (currentGame is not null)
         }
     }   
     <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState ShipDict=@shipDict/>
+    <Map ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame />
     
 }
 

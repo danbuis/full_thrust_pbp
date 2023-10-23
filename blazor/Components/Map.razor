@@ -1,0 +1,26 @@
+﻿@namespace FT_Blazor.Components
+@using FT_Blazor.Models
+@using FT_Blazor.Components
+
+
+<MudPaper Class="pa-16 ma-2" Elevation="3">
+    <div style="height:60rem;width:50rem;background:#222222">
+
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public Dictionary<string, List<Ship>> ShipDict { get; set; }
+
+    [Parameter, EditorRequired]
+    public string loggedInPlayer { get; set; }
+
+    [Parameter, EditorRequired]
+    public Game CurrentGame { get; set; }
+
+    private Ship selectedItem1 = null;
+    private Ship shipBeforeEdit = null;
+    string baseURL = "https://ft-functions.azurewebsites.net/api/";
+    string test;
+}
