@@ -4,8 +4,24 @@
 
 
 <MudPaper Class="pa-16 ma-2" Elevation="3">
-    <div style="height:60rem;width:50rem;background:#222222">
-
+    <div style="position:relative;height:60rem;width:50rem;background:#090909">
+        @foreach(string player in ShipDict.Keys)
+        {
+            if (player.Equals(loggedInPlayer))
+            {
+                foreach(Ship ship in ShipDict[player])
+                {
+                    <div style=@($"position:absolute;height:0.5rem;width:0.5rem;background:#22C122;{calc_position(ship)}")/>
+                }
+            }
+            else if (!player.Equals(loggedInPlayer))
+            {
+                foreach (Ship ship in ShipDict[player])
+                {
+                    <div style=@($"position:absolute;height:0.5rem;width:0.5rem;background:#C12222;{calc_position(ship)}") />
+                }
+            }
+        }
     </div>
 </MudPaper>
 
@@ -19,8 +35,11 @@
     [Parameter, EditorRequired]
     public Game CurrentGame { get; set; }
 
-    private Ship selectedItem1 = null;
-    private Ship shipBeforeEdit = null;
-    string baseURL = "https://ft-functions.azurewebsites.net/api/";
-    string test;
+    private string calc_position(Ship ship)
+    {
+        float xPercentage = (ship.X + 50) / 100f * 100;
+        float yPercentage = (ship.Y + 60) / 120f * 100;
+
+        return $"left:{xPercentage}%;top:{yPercentage}%";
+    }
 }
