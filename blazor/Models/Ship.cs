@@ -44,4 +44,25 @@ public class Ship
 
     [JsonProperty(PropertyName = "dateCreated")]
     public DateTime DateCreated { get; set; }
+
+    public (float, float) GetNextCoordinates()
+    {
+        int NewCurrentSpeed = CurrentSpeed + SpeedChange;
+        int NewCurrentBearing = (CurrentBearing + BearingChange) % 12;
+
+        int deltaBearing = NewCurrentBearing - CurrentBearing;
+
+        int firstBearing = CurrentBearing + (int)Math.Floor(deltaBearing / 2.0);
+        int secondBearing = firstBearing + (int)Math.Ceiling(deltaBearing / 2.0);
+
+        int firstMove = (int)Math.Floor(NewCurrentSpeed / 2.0);
+        int secondMove = NewCurrentSpeed - firstMove;
+
+        float intermediateX = X + (float)Math.Sin(firstBearing * Math.PI / 6) * firstMove;
+        float intermediateY = Y + (float)Math.Cos(firstBearing * Math.PI / 6) * firstMove;
+
+        float newX = intermediateX + (float)Math.Sin(secondBearing * Math.PI / 6) * secondMove;
+        float newY = intermediateY + (float)Math.Cos(secondBearing * Math.PI / 6) * secondMove;
+        return (newX, newY);
+    }
 }

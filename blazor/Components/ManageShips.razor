@@ -38,10 +38,10 @@
         <MudText>@context.CurrentSpeed</MudText>
         <MudText>@context.CurrentBearing</MudText>
         <MudTd DataLabel="Speed">
-                <MudNumericField @bind-Value="@context.SpeedChange" Required Min="0" />
+                <MudNumericField @bind-Value="@context.SpeedChange" Required />
         </MudTd>
         <MudTd DataLabel="Bearing">
-                <MudNumericField @bind-Value="@context.BearingChange" Required Min="0" Max="12" />
+                <MudNumericField @bind-Value="@context.BearingChange" Required Min="-6" Max="6" />
         </MudTd>
     </RowEditingTemplate>
 </MudTable>
@@ -103,24 +103,11 @@
 
     private async Task MoveShipViaNavigation(Ship ship)
     {
-        string Id = ship.Id;
-        int NewCurrentSpeed = ship.CurrentSpeed + ship.SpeedChange;
-        int NewCurrentBearing = (ship.CurrentBearing + ship.CurrentBearing) % 12;
+        (float, float) newCoordinates = ship.GetNextCoordinates();
+        int NewCurrentBearing = ship.BearingChange + ship.CurrentBearing;
+        int NewCurrentSpeed = ship.SpeedChange + ship.CurrentSpeed;
 
-        int initialAngle = ship.CurrentBearing * 30;
-        int deltaBearing = NewCurrentBearing - ship.CurrentBearing;
-        int firstBearing = initialAngle + (int)Math.Floor(deltaBearing / 2.0) * 30;
-        int secondBearing = (deltaBearing - firstBearing * 30) + firstBearing;
-
-        int firstMove = (int)Math.Floor(NewCurrentSpeed / 2.0);
-        int secondMove = NewCurrentSpeed - firstMove;
-
-        double intermediateX = ship.X + Math.Sin(firstBearing) * firstMove;
-        double intermediateY = ship.Y + Math.Cos(firstBearing) * firstMove;
-
-        double X = intermediateX + Math.Sin(secondBearing) * secondMove;
-        double Y = intermediateY + Math.Cos(secondBearing) * secondMove;
-        string queryURL = baseURL + $"MoveShipToCoordinates?id={Id}&bearing={NewCurrentBearing}&speed={NewCurrentSpeed}&x={X}&y={Y}";
+        string queryURL = baseURL + $"MoveShipToCoordinates?id={ship.Id}&bearing={NewCurrentBearing}&speed={NewCurrentSpeed}&x={ship.X}&y={ship.Y}";
 
         HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
         HttpResponseMessage response = await client.PutAsync(client.BaseAddress, null);
