@@ -21,22 +21,16 @@
         EditTrigger="TableEditTrigger.RowClick">
     <HeaderContent>
         <MudTh>Name</MudTh>
-        <MudTh>Current Speed</MudTh>
-        <MudTh>Current Bearing</MudTh>
         <MudTh>Speed Change</MudTh>
         <MudTh>Bearing Change</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd>@context.Name</MudTd>
-        <MudTd>@context.CurrentSpeed</MudTd>
-        <MudTd>@context.CurrentBearing</MudTd>
         <MudTd>@context.SpeedChange</MudTd>
         <MudTd>@context.BearingChange</MudTd>
     </RowTemplate>
     <RowEditingTemplate>
         <MudText>@context.Name</MudText>
-        <MudText>@context.CurrentSpeed</MudText>
-        <MudText>@context.CurrentBearing</MudText>
         <MudTd DataLabel="Speed">
                 <MudNumericField @bind-Value="@context.SpeedChange" Required />
         </MudTd>
@@ -145,8 +139,6 @@
         shipBeforeEdit = new()
             {
                 Name = ((Ship)ship).Name,
-                CurrentSpeed = ((Ship)ship).CurrentSpeed,
-                CurrentBearing = ((Ship)ship).CurrentBearing,
                 SpeedChange = ((Ship)ship).SpeedChange,
                 BearingChange = ((Ship)ship).BearingChange
             };
@@ -156,8 +148,6 @@
     private void ResetItemToOriginalValues(object ship)
     {
         ((Ship)ship).Name = shipBeforeEdit.Name;
-        ((Ship)ship).CurrentSpeed = shipBeforeEdit.CurrentSpeed;
-        ((Ship)ship).CurrentBearing = shipBeforeEdit.CurrentBearing;
         ((Ship)ship).SpeedChange = shipBeforeEdit.SpeedChange;
         ((Ship)ship).BearingChange = shipBeforeEdit.BearingChange;
         StateHasChanged();
