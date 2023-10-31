@@ -63,9 +63,10 @@ else if (currentGame is not null)
         @if(currentGame.Phase != "deployment"){
             <ManageShips ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame RefreshParent=@RefreshState />
         }
-    }   
-    <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState ShipDict=@shipDict/>
+    }
     <Map ShipDict=@shipDict loggedInPlayer=@loggedInPlayer CurrentGame=@currentGame />
+    <AddShip GameObject=@currentGame Player=@loggedInPlayer RefreshParent=@RefreshState ShipDict=@shipDict/>
+
     
 }
 

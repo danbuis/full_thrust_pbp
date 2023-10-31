@@ -21,27 +21,21 @@
         EditTrigger="TableEditTrigger.RowClick">
     <HeaderContent>
         <MudTh>Name</MudTh>
-        <MudTh>Current Speed</MudTh>
-        <MudTh>Current Bearing</MudTh>
         <MudTh>Speed Change</MudTh>
         <MudTh>Bearing Change</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd>@context.Name</MudTd>
-        <MudTd>@context.CurrentSpeed</MudTd>
-        <MudTd>@context.CurrentBearing</MudTd>
         <MudTd>@context.SpeedChange</MudTd>
         <MudTd>@context.BearingChange</MudTd>
     </RowTemplate>
     <RowEditingTemplate>
         <MudText>@context.Name</MudText>
-        <MudText>@context.CurrentSpeed</MudText>
-        <MudText>@context.CurrentBearing</MudText>
         <MudTd DataLabel="Speed">
-                <MudNumericField @bind-Value="@context.SpeedChange" Required Min="0" />
+                <MudNumericField @bind-Value="@context.SpeedChange" Required />
         </MudTd>
         <MudTd DataLabel="Bearing">
-                <MudNumericField @bind-Value="@context.BearingChange" Required Min="0" Max="12" />
+                <MudNumericField @bind-Value="@context.BearingChange" Required Min="-6" Max="6" />
         </MudTd>
     </RowEditingTemplate>
 </MudTable>
@@ -87,7 +81,7 @@
 
         if (CurrentGame.PlayerSignoffs.Count == CurrentGame.PlayerCount)
         {
-            string advancePhaseURL = baseURL + $"AdvancePhase?id={CurrentGame.Id}&phase=shooting";
+            string advancePhaseURL = baseURL + $"AdvancePhase?id={CurrentGame.Id}&phase=movement";
             HttpClient advanceClient = new HttpClient { BaseAddress = new Uri(advancePhaseURL) };
             HttpResponseMessage advanceResponse = await client.PutAsync(advanceClient.BaseAddress, null);
             foreach (Ship ship in BuildShipList())
@@ -95,7 +89,7 @@
                 await MoveShipViaNavigation(ship);
             }
             CurrentGame.PlayerSignoffs = new List<string>();
-            CurrentGame.Phase = "shooting";
+            CurrentGame.Phase = "movement";
         }
 
         this.StateHasChanged();
@@ -103,24 +97,11 @@
 
     private async Task MoveShipViaNavigation(Ship ship)
     {
-        string Id = ship.Id;
-        int NewCurrentSpeed = ship.CurrentSpeed + ship.SpeedChange;
-        int NewCurrentBearing = (ship.CurrentBearing + ship.CurrentBearing) % 12;
+        (float, float) newCoordinates = ship.GetNextCoordinates();
+        int NewCurrentBearing = ship.BearingChange + ship.CurrentBearing;
+        int NewCurrentSpeed = ship.SpeedChange + ship.CurrentSpeed;
 
-        int initialAngle = ship.CurrentBearing * 30;
-        int deltaBearing = NewCurrentBearing - ship.CurrentBearing;
-        int firstBearing = initialAngle + (int)Math.Floor(deltaBearing / 2.0) * 30;
-        int secondBearing = (deltaBearing - firstBearing * 30) + firstBearing;
-
-        int firstMove = (int)Math.Floor(NewCurrentSpeed / 2.0);
-        int secondMove = NewCurrentSpeed - firstMove;
-
-        double intermediateX = ship.X + Math.Sin(firstBearing) * firstMove;
-        double intermediateY = ship.Y + Math.Cos(firstBearing) * firstMove;
-
-        double X = intermediateX + Math.Sin(secondBearing) * secondMove;
-        double Y = intermediateY + Math.Cos(secondBearing) * secondMove;
-        string queryURL = baseURL + $"MoveShipToCoordinates?id={Id}&bearing={NewCurrentBearing}&speed={NewCurrentSpeed}&x={X}&y={Y}";
+        string queryURL = baseURL + $"MoveShipToCoordinates?id={ship.Id}&bearing={NewCurrentBearing}&speed={NewCurrentSpeed}&x={newCoordinates.Item1}&y={newCoordinates.Item2}";
 
         HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
         HttpResponseMessage response = await client.PutAsync(client.BaseAddress, null);
@@ -158,8 +139,6 @@
         shipBeforeEdit = new()
             {
                 Name = ((Ship)ship).Name,
-                CurrentSpeed = ((Ship)ship).CurrentSpeed,
-                CurrentBearing = ((Ship)ship).CurrentBearing,
                 SpeedChange = ((Ship)ship).SpeedChange,
                 BearingChange = ((Ship)ship).BearingChange
             };
@@ -169,8 +148,6 @@
     private void ResetItemToOriginalValues(object ship)
     {
         ((Ship)ship).Name = shipBeforeEdit.Name;
-        ((Ship)ship).CurrentSpeed = shipBeforeEdit.CurrentSpeed;
-        ((Ship)ship).CurrentBearing = shipBeforeEdit.CurrentBearing;
         ((Ship)ship).SpeedChange = shipBeforeEdit.SpeedChange;
         ((Ship)ship).BearingChange = shipBeforeEdit.BearingChange;
         StateHasChanged();
