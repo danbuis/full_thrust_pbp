@@ -1,0 +1,48 @@
+﻿@namespace FT_Blazor.Components
+@using FT_Blazor.Models
+@using FT_Blazor.Components
+
+
+<MudPaper Class="pa-16 ma-2" Elevation="3">
+    <div style="position:relative;height:60rem;width:50rem;background:#090909">
+        @foreach(string player in ShipDict.Keys)
+        {
+            if (player.Equals(loggedInPlayer))
+            {
+                foreach(Ship ship in ShipDict[player])
+                {
+                    <div style=@($"position:absolute;height:0.5rem;width:0.5rem;background:#22C122;{calc_position(ship.X, ship.Y)}")/>
+                    (float, float) newCoords = ship.GetNextCoordinates();
+                    <div style=@($"position:absolute;height:0.5rem;width:0.5rem;background:#116011;{calc_position(newCoords.Item1, newCoords.Item2)}") />
+
+                }
+            }
+            else if (CurrentGame.Phase != "deployment" && !player.Equals(loggedInPlayer))
+            {
+                foreach (Ship ship in ShipDict[player])
+                {
+                    <div style=@($"position:absolute;height:0.5rem;width:0.5rem;background:#C12222;{calc_position(ship.X, ship.Y)}") />
+                }
+            }
+        }
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public Dictionary<string, List<Ship>> ShipDict { get; set; }
+
+    [Parameter, EditorRequired]
+    public string loggedInPlayer { get; set; }
+
+    [Parameter, EditorRequired]
+    public Game CurrentGame { get; set; }
+
+    private string calc_position(float X, float Y)
+    {
+        float xPercentage = (X + 50) / 100f * 100;
+        float yPercentage = (Y + 60) / 120f * 100;
+
+        return $"left:{xPercentage}%;bottom:{yPercentage}%";
+    }
+}

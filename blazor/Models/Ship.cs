@@ -36,9 +36,33 @@ public class Ship
     [JsonProperty(PropertyName = "bearingChange")]
     public int BearingChange { get; set; }
 
-    [JsonProperty(PropertyName = "NavigationOrders")]
-    public int[] NavigationOrders { get; set; }
+    [JsonProperty(PropertyName = "NewSpeed")]
+    public int NewSpeed { get; set; }
+
+    [JsonProperty(PropertyName = "NewBearing")]
+    public int NewBearing { get; set; }
 
     [JsonProperty(PropertyName = "dateCreated")]
     public DateTime DateCreated { get; set; }
+
+    public (float, float) GetNextCoordinates()
+    {
+        int NewCurrentSpeed = CurrentSpeed + SpeedChange;
+        int NewCurrentBearing = (CurrentBearing + BearingChange) % 12;
+
+        int deltaBearing = NewCurrentBearing - CurrentBearing;
+        int mult = deltaBearing > 0 ? 1 : -1;
+        int firstBearing = CurrentBearing + mult * (int)Math.Floor(Math.Abs(deltaBearing) / 2.0);
+        int secondBearing = firstBearing + mult* (int)Math.Ceiling(Math.Abs(deltaBearing) / 2.0);
+
+        int firstMove = (int)Math.Floor(NewCurrentSpeed / 2.0);
+        int secondMove = NewCurrentSpeed - firstMove;
+
+        float intermediateX = X + (float)Math.Sin(firstBearing * Math.PI / 6) * firstMove;
+        float intermediateY = Y + (float)Math.Cos(firstBearing * Math.PI / 6) * firstMove;
+
+        float newX = intermediateX + (float)Math.Sin(secondBearing * Math.PI / 6) * secondMove;
+        float newY = intermediateY + (float)Math.Cos(secondBearing * Math.PI / 6) * secondMove;
+        return (newX, newY);
+    }
 }

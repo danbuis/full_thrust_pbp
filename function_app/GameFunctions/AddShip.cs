@@ -85,6 +85,8 @@ public class AddShip
             CurrentBearing = 0,
             X = 0,
             Y = 0,
+            NewSpeed = 0,
+            NewBearing = 0,
             DateCreated = DateTime.Now
         };
         await ShipsDocumentsOut.AddAsync(shipToAdd);
