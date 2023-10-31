@@ -11,6 +11,7 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace FT_Functions.ShipFunctions
 {
@@ -48,8 +49,8 @@ namespace FT_Functions.ShipFunctions
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-            int newX = int.Parse(req.Query["x"]);
-            int newY = int.Parse(req.Query["y"]);
+            float newX = float.Parse(req.Query["x"], CultureInfo.InvariantCulture.NumberFormat);
+            float newY = float.Parse(req.Query["y"], CultureInfo.InvariantCulture.NumberFormat);
             int newSpeed = int.Parse(req.Query["speed"]);
             int newBearing = int.Parse(req.Query["bearing"]);
 

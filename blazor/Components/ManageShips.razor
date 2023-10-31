@@ -81,7 +81,7 @@
 
         if (CurrentGame.PlayerSignoffs.Count == CurrentGame.PlayerCount)
         {
-            string advancePhaseURL = baseURL + $"AdvancePhase?id={CurrentGame.Id}&phase=shooting";
+            string advancePhaseURL = baseURL + $"AdvancePhase?id={CurrentGame.Id}&phase=movement";
             HttpClient advanceClient = new HttpClient { BaseAddress = new Uri(advancePhaseURL) };
             HttpResponseMessage advanceResponse = await client.PutAsync(advanceClient.BaseAddress, null);
             foreach (Ship ship in BuildShipList())
@@ -89,7 +89,7 @@
                 await MoveShipViaNavigation(ship);
             }
             CurrentGame.PlayerSignoffs = new List<string>();
-            CurrentGame.Phase = "shooting";
+            CurrentGame.Phase = "movement";
         }
 
         this.StateHasChanged();
@@ -101,7 +101,7 @@
         int NewCurrentBearing = ship.BearingChange + ship.CurrentBearing;
         int NewCurrentSpeed = ship.SpeedChange + ship.CurrentSpeed;
 
-        string queryURL = baseURL + $"MoveShipToCoordinates?id={ship.Id}&bearing={NewCurrentBearing}&speed={NewCurrentSpeed}&x={ship.X}&y={ship.Y}";
+        string queryURL = baseURL + $"MoveShipToCoordinates?id={ship.Id}&bearing={NewCurrentBearing}&speed={NewCurrentSpeed}&x={newCoordinates.Item1}&y={newCoordinates.Item2}";
 
         HttpClient client = new HttpClient { BaseAddress = new Uri(queryURL) };
         HttpResponseMessage response = await client.PutAsync(client.BaseAddress, null);

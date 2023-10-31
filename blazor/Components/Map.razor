@@ -17,7 +17,7 @@
 
                 }
             }
-            else if (!player.Equals(loggedInPlayer))
+            else if (CurrentGame.Phase != "deployment" && !player.Equals(loggedInPlayer))
             {
                 foreach (Ship ship in ShipDict[player])
                 {

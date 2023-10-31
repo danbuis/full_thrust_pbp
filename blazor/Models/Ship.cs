@@ -51,9 +51,9 @@ public class Ship
         int NewCurrentBearing = (CurrentBearing + BearingChange) % 12;
 
         int deltaBearing = NewCurrentBearing - CurrentBearing;
-
-        int firstBearing = CurrentBearing + (int)Math.Floor(deltaBearing / 2.0);
-        int secondBearing = firstBearing + (int)Math.Ceiling(deltaBearing / 2.0);
+        int mult = deltaBearing > 0 ? 1 : -1;
+        int firstBearing = CurrentBearing + mult * (int)Math.Floor(Math.Abs(deltaBearing) / 2.0);
+        int secondBearing = firstBearing + mult* (int)Math.Ceiling(Math.Abs(deltaBearing) / 2.0);
 
         int firstMove = (int)Math.Floor(NewCurrentSpeed / 2.0);
         int secondMove = NewCurrentSpeed - firstMove;
